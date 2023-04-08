@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader
 from torch.backends import cudnn
 
 import project_6127.data.preprocessing as preprocessing
@@ -132,7 +133,9 @@ if __name__ == '__main__':
         criterion = criterion.cuda()
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
 
-    train_epoches(dataset = abstracts, model = model, 
+    dataset = DataLoader(abstracts, config.batch_size)
+
+    train_epoches(dataset = dataset, model = model, 
                     criterion = criterion, 
                     optimizer = optimizer,
                     vocab_size = vocab_size,                    

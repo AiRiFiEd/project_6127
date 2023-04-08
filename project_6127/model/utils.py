@@ -55,25 +55,29 @@ def train_batch(model, criterion, optimizer, vocab_size,
 def train_epoches(dataset, model, criterion, optimizer, 
                     vocab_size, teacher_forcing_ratio, 
                     config):
-    train_loader = DataLoader(dataset, config.batch_size)
+    # train_loader = DataLoader(dataset, config.batch_size)
+    train_loader = dataset
     model.train(True)
     prev_epoch_loss_list = [100] * config.num_of_exams
     for epoch in range(1, config.epochs + 1):
         epoch_examples_total = 0
         epoch_loss_list = [0] * config.num_of_exams
         for batch_idx, (source, target, input_lengths) in enumerate(train_loader):
-            input_variables = source
-            target_variables = target
-            # train model
-            loss_list = train_batch(model, criterion, optimizer, vocab_size,
-                                        input_variables, input_lengths.tolist(),
-                                        target_variables, teacher_forcing_ratio,
-                                        config)
-            # Record average loss
-            num_examples = len(source)
-            epoch_examples_total += num_examples
-            for i in range(config.num_of_exams):
-                epoch_loss_list[i] += loss_list[i] * num_examples
+            try:
+                input_variables = source
+                target_variables = target
+                # train model              
+                loss_list = train_batch(model, criterion, optimizer, vocab_size,
+                                            input_variables, input_lengths.tolist(),
+                                            target_variables, teacher_forcing_ratio,
+                                            config)
+                # Record average loss
+                num_examples = len(source)
+                epoch_examples_total += num_examples
+                for i in range(config.num_of_exams):
+                    epoch_loss_list[i] += loss_list[i] * num_examples
+            except:
+                continue
 
         for i in range(config.num_of_exams):
             epoch_loss_list[i] /= float(epoch_examples_total)
