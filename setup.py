@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='project_6127',
-      version='0.0.01',
+      version='0.0.04',
       description='Package for AI6127 Project',
       long_description=long_description,
       url='https://github.com/AiRiFiEd/project_6127',

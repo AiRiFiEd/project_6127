@@ -225,12 +225,11 @@ class Vectorizer(object):
         return vcorpus
 
 class Abstracts(Dataset):
-    def __init__(self, max_len: int = 200, 
-                 use_cuda: bool = torch.cuda.is_available()) -> None:
+    def __init__(self, use_cuda: bool, max_len: int = 200) -> None:
         self.max_len = max_len # allowed max length of abstracts 
         self.use_cuda = use_cuda
 
-        self.head_len = 0
+        self.head_len = 0 # actual max length of titles
         self.abs_len = 0 # actual max length of abstracts, capped at `max_len`
         
         self.data = None

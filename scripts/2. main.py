@@ -29,10 +29,12 @@ def setup_backend():
     if torch.cuda.is_available():        
         torch.cuda.manual_seed(config.seed)
         config.cuda_is_available = True
+        config.cuda_is_available = False
     logger.info('cuda is {is_available}available'.format(is_available = 
         (not torch.cuda.is_available()) * 'not '
     ))
     logger.debug('setting up backend completed.')
+    config.batch_size = 64
     return config
 
 def load_data(name: str = 'train') -> preprocessing.Data:
@@ -59,7 +61,8 @@ def build_model(vocab_size, embedding_size, max_length_title, max_length_abstrac
                     decoder_cell, decoder_n_layers,
                     decoder_input_dropout_perc,
                     decoder_bidirectional,
-                    decoder_dropout_perc) -> nn.Module:
+                    decoder_dropout_perc,
+                    config) -> nn.Module:
     
     embedding = build_embedding(vocab_size, embedding_size, 0)
 
@@ -77,7 +80,8 @@ def build_model(vocab_size, embedding_size, max_length_title, max_length_abstrac
                          rnn_cell=encoder_cell)
     decoder = DecoderRNNFB(vocab_size, embedding, max_length_abstract, 
                             embedding_size, sos_id=2, eos_id=1,
-                            n_layers=decoder_n_layers, rnn_cell=decoder_cell, 
+                            config = config, n_layers=decoder_n_layers, 
+                            rnn_cell=decoder_cell, 
                             bidirectional=decoder_bidirectional,
                             input_dropout_perc=decoder_input_dropout_perc, 
                             dropout_perc=decoder_dropout_perc)
@@ -95,7 +99,9 @@ if __name__ == '__main__':
         max_len = config.max_len
     )
     
-    abstracts = preprocessing.Abstracts()
+    abstracts = preprocessing.Abstracts(
+                    use_cuda=config.cuda_is_available
+                )
     abstracts.process_corpus(data, vectorizer)
     vocab_size = vectorizer.vocabulary_size
 
@@ -116,7 +122,8 @@ if __name__ == '__main__':
         decoder_n_layers = config.nlayers,
         decoder_input_dropout_perc = config.dropout,
         decoder_bidirectional = config.bidirectional,
-        decoder_dropout_perc = config.dropout
+        decoder_dropout_perc = config.dropout,
+        config = config
     )
 
     criterion = nn.CrossEntropyLoss(ignore_index=0)

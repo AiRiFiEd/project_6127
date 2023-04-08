@@ -25,9 +25,9 @@ class Gate(nn.Module):
         self.wnh = nn.Linear(hidden_size, hidden_size)
 
     def forward(self, title, pg):
-        r_gate = F.sigmoid(self.wrx(title) + self.wrh(pg))
-        i_gate = F.sigmoid(self.wix(title) + self.wih(pg))
-        n_gate = F.tanh(self.wnx(title) + torch.mul(r_gate, self.wnh(pg)))
+        r_gate = torch.sigmoid(self.wrx(title) + self.wrh(pg))
+        i_gate = torch.sigmoid(self.wix(title) + self.wih(pg))
+        n_gate = torch.tanh(self.wnx(title) + torch.mul(r_gate, self.wnh(pg)))
         result = torch.mul(i_gate, pg) + torch.mul(torch.add(-i_gate, 1), n_gate)
         return result
     
@@ -39,7 +39,8 @@ class DecoderRNNFB(BaseRNN):
 
     def __init__(self, vocab_size: int, embedding: nn.Embedding,
                     max_len: int, embedding_size: int, sos_id,
-                    eos_id, n_layers: int = 1, rnn_cell: str = 'gru',
+                    eos_id, config, n_layers: int = 1, 
+                    rnn_cell: str = 'gru',
                     bidirectional: bool = False, 
                     input_dropout_perc: float = 0.,
                     dropout_perc: float = 0.):
@@ -59,6 +60,7 @@ class DecoderRNNFB(BaseRNN):
         self.max_length = max_len
         self.eos_id = eos_id
         self.sos_id = sos_id
+        self.config = config
         self.init_input = None
         self.embedding = embedding
         
@@ -116,7 +118,7 @@ class DecoderRNNFB(BaseRNN):
             if teacher_forcing_ratio > 0:
                 raise ValueError("Teacher forcing has to be disabled (set 0) when no inputs is provided.")
             inputs = torch.LongTensor([self.sos_id] * batch_size).view(batch_size, 1)
-            if torch.cuda.is_available():
+            if self.config.cuda_is_available:
                 inputs = inputs.cuda()
             max_length = self.max_length
         else:

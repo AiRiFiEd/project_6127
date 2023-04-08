@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 # Mask variable
 def _mask(prev_generated_seq, config):
-    prev_mask = torch.eq(prev_generated_seq, 1)
+    prev_mask = torch.eq(prev_generated_seq, 1).type(torch.float32)
     lengths = torch.argmax(prev_mask,dim=1)
     max_len = prev_generated_seq.size(1)
     mask = []
@@ -25,7 +25,7 @@ def _mask(prev_generated_seq, config):
     mask = torch.ByteTensor(mask)
     if config.cuda_is_available:
         mask = mask.cuda()
-    return prev_generated_seq.data.masked_fill_(mask, 0)
+    return prev_generated_seq.data.masked_fill_(mask, 0.)
 
 def train_batch(model, criterion, optimizer, vocab_size,
                 input_variable, input_lengths, target_variable, 
