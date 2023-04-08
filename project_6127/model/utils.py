@@ -48,7 +48,7 @@ def train_batch(model, criterion, optimizer, vocab_size,
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.max_grad_norm)
         optimizer.step()
         prev_generated_seq = torch.squeeze(torch.topk(decoder_outputs, 1, dim=2)[1]).view(-1, decoder_outputs.size(1))
-        prev_generated_seq = _mask(prev_generated_seq)
+        prev_generated_seq = _mask(prev_generated_seq, config)
     return loss_list
 
 
